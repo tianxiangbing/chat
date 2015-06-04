@@ -1,4 +1,4 @@
-var db = require('../db/conn');
+var db = require('../db/mysql');
 var express = require('express');
 var router = express.Router();
 /* GET users listing. */
