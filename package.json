@@ -16,7 +16,8 @@
     "morgan": "~1.5.3",
     "serve-favicon": "~2.2.1",
     "markdown-js": ">= 0.0.1",
-    "mongodb": "~2.0"
+    "mongodb": "~2.0",
+    "mysql":"2.0.0-alpha9"
   },
   "engines": {
     "node": "0.12.2"
