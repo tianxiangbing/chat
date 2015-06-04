@@ -16,6 +16,10 @@ block content
     |       alert('请填写昵称');
     |       return false;
     |   }
+    |   if($("#m").val().length==0){
+    |       alert('内容不能为空!');
+    |       return false;
+    |   }
     |  socket.emit('chat message', {user:$('#u').val(),msg:$('#m').val()});
     |  $('#m').val('');
     |  return false;
