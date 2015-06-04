@@ -15,8 +15,7 @@
     "jade": "~1.9.2",
     "morgan": "~1.5.3",
     "serve-favicon": "~2.2.1",
-    "markdown-js": ">= 0.0.1",
-    "mysql": "2.0.0-alpha9"
+    "markdown-js": ">= 0.0.1"
   },
   "engines": {
     "node": "0.12.2"
