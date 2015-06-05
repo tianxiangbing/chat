@@ -1,5 +1,14 @@
 #!/usr/bin/env node
 
+/*
+ * Created with Sublime Text 2.
+ * User: 田想兵
+ * Date: 2015-06-04
+ * 网址:http://www.lovewebgames.com
+ * 聊天室：http://chat.lovewebgames.com
+ * Time: 17:02:02
+ * Contact: 55342775@qq.com
+ */
 /**
  * Module dependencies.
  */
@@ -8,11 +17,13 @@ var app = require('./app');
 var debug = require('debug')('web:server');
 var http = require('http');
 
+var db = require('./db/mysql');
+
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '8080');
+var port = normalizePort(process.env.PORT || '8090');
 app.set('port', port);
 
 /**
@@ -27,17 +38,70 @@ var server = http.createServer(app);
 
 var io = require('socket.io')(server);
 
+var users = {};
+var counter = 0;
+
 io.on('connection', function(socket) {
 	console.log('a user connected.');
-	socket.broadcast.emit('hi',{})
+	var username = "";
+	socket.broadcast.emit('hi', {})
 	socket.on('disconnect', function() {
 		console.log('user disconnected.');
 	});
-	socket.on('chat message', function(msg) {
+	socket.on('chat message', function(data) {
+		var msg= data.msg
 		console.log('message: ' + msg);
-		io.emit('chat message',msg);
-	})
+		var data = {};
+		data.user = username || data.user;
+		users[username] = data.user;
+		data.msg = msg;
+		data.time = +new Date();
+		sendmsg(data);
+		insertData(data);
+	});
+	socket.on('user join', function(data) {
+		counter++;
+		username = data.user;
+		users[username] = username;
+		console.log('join:' + data.user);
+		data.type = 0;
+		data.users = users;
+		data.counter = counter;
+		data.msg = "欢迎<b>" + data.user + "</b>进入聊天室";
+		sendmsg(data);
+	});
+	socket.on('disconnect', function() {
+		console.log('disconnect')
+		if (username) {
+			counter--;
+			delete users[username]
+			sendmsg({
+				type: 0,
+				msg: "用户<b>" + username + "</b>离开聊天室"
+			})
+		}
+	});
 });
+//插入数据库
+function insertData(data) {
+	var conn = db.connect();
+	var post = {
+		msg: data.msg,
+		uname: data.user
+		,time:data.time.toString()
+	};
+	var query = conn.query('insert into chatmsg set ?', post, function(err,result) {
+		console.log(err);
+		console.log(result)
+	})
+	console.log(query.sql);
+	conn.end();
+}
+
+function sendmsg(data) {
+	io.emit('chat message', data);
+}
+
 io.emit('some event', {
 	for: "everyone"
 });
@@ -51,19 +115,19 @@ server.on('listening', onListening);
  */
 
 function normalizePort(val) {
-  var port = parseInt(val, 10);
+	var port = parseInt(val, 10);
 
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
+	if (isNaN(port)) {
+		// named pipe
+		return val;
+	}
 
-  if (port >= 0) {
-    // port number
-    return port;
-  }
+	if (port >= 0) {
+		// port number
+		return port;
+	}
 
-  return false;
+	return false;
 }
 
 /**
@@ -71,27 +135,25 @@ function normalizePort(val) {
  */
 
 function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
+	if (error.syscall !== 'listen') {
+		throw error;
+	}
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+	var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
 
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
+	// handle specific listen errors with friendly messages
+	switch (error.code) {
+		case 'EACCES':
+			console.error(bind + ' requires elevated privileges');
+			process.exit(1);
+			break;
+		case 'EADDRINUSE':
+			console.error(bind + ' is already in use');
+			process.exit(1);
+			break;
+		default:
+			throw error;
+	}
 }
 
 /**
@@ -99,37 +161,7 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
+	var addr = server.address();
+	var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
+	debug('Listening on ' + bind);
 }
-
-return ;
-var app = require('express')();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-
-app.get('/', function(req, res) {
-	res.sendfile(__dirname + '/index.html');
-});
-
-io.on('connection', function(socket) {
-	console.log('a user connected.');
-	socket.broadcast.emit('hi',{})
-	socket.on('disconnect', function() {
-		console.log('user disconnected.');
-	});
-	socket.on('chat message', function(msg) {
-		console.log('message: ' + msg);
-		io.emit('chat message',msg);
-	})
-});
-io.emit('some event', {
-	for: "everyone"
-});
-
-http.listen((process.env.PORT || 5000), function() {
-	console.log('listening on *:3000');
-});

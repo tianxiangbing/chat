@@ -1,31 +1,21 @@
 extends layout
 
 block content
-  h1= title
-  ul#messages
-  form.form
-    input#u(placeholder="用户昵称")
-    input#m
-    button#s send
-  script(src="//code.jquery.com/jquery-1.11.1.js")
-  script(src="/socket.io/socket.io.js")
-  script 
-    |var socket = io();
-    |$('form').submit(function() {
-    |   if($("#u").val().length==0){
-    |       alert('请填写昵称');
-    |       return false;
-    |   }
-    |   if($("#m").val().length==0){
-    |       alert('内容不能为空!');
-    |       return false;
-    |   }
-    |  socket.emit('chat message', {user:$('#u').val(),msg:$('#m').val()});
-    |  $('#m').val('');
-    |  return false;
-    |});
-    |socket.on('chat message', function(data) {
-    |   $('#messages').append($('<li>'+data.user+ '说：' + data.msg + '</li>'))
-    |});
-    |socket.on('hi', function() {
-    |});
+  div#inputName
+     请填写昵称：
+     input#u(placeholder="用户昵称",maxlength=20)
+     p
+      button#okname 进入聊天室
+  div#chat
+    div#msgContent
+      ul#messages
+      form.form
+        div#sendContent
+          input#m(maxlength=200)
+          button#s 发射
+    div#users
+      div#online
+      ol#userlist
+  script(src="/javascripts/jquery-1.11.2.js")
+  script(src="/javascripts/socket.io.js")
+  script(src="/javascripts/chat.js")
