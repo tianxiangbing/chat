@@ -40,6 +40,7 @@ var io = require('socket.io')(server);
 
 var users = {};
 var counter = 0;
+var xss = require('xss');
 
 io.on('connection', function(socket) {
 	console.log('a user connected.');
@@ -50,19 +51,18 @@ io.on('connection', function(socket) {
 	});
 	socket.on('chat message', function(data) {
 		var msg= data.msg
-		console.log('message: ' + msg);
 		var data = {};
-		data.user = username || data.user;
+		data.user = xss( username || data.user);
 		users[username] = data.user;
-		data.msg = msg;
+		data.msg =  xss(msg);
 		data.time = +new Date();
 		sendmsg(data);
 		insertData(data);
 	});
 	socket.on('user join', function(data) {
 		counter++;
-		username = data.user;
-		users[username] = username;
+		username = xss(data.user);
+		users[username] = xss(username);
 		console.log('join:' + data.user);
 		data.type = 0;
 		data.users = users;
@@ -77,7 +77,9 @@ io.on('connection', function(socket) {
 			delete users[username]
 			sendmsg({
 				type: 0,
-				msg: "用户<b>" + username + "</b>离开聊天室"
+				msg: "用户<b>" + username + "</b>离开聊天室",
+				counter:counter,
+				users:users
 			})
 		}
 	});

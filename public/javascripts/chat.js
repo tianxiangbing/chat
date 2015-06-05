@@ -9,11 +9,18 @@ $(function() {
             return false;
         };
         $.get('/getmsg', {}, function(result) {
+            var html = '';
             for (var i = 0, l = result.length; i < l; i++) {
                 var data = result[i];
-                data.user= data.uname;
-                formatMsg(data);
+                data.user = data.uname;
+                var cls = '';
+                if (data.user == $("#u").val()) {
+                    cls = ' mine ';
+                }
+                html += '<li class="msg ' + cls + '"><p><b>' + data.user + '</b>：<span>(' + formatTime(data.time) + ')</span></p><div>' + data.msg + '</div></li>';
             }
+            $('#messages').prepend(html);
+            $('#messages').scrollTop(99999);
         }, 'json');
         $('#inputName').hide();
         $('#chat').show();
@@ -47,14 +54,14 @@ $(function() {
             if (data.user == $("#u").val()) {
                 cls = ' mine ';
             }
-            $('#messages').append($('<li class="msg ' + cls + '"><p><b>' + data.user + '</b>：<span>(' + data.time + ')</span></p><div>' + data.msg + '</div></li>'))
+            $('#messages').append($('<li class="msg ' + cls + '"><p><b>' + data.user + '</b>：<span>(' + formatTime(data.time) + ')</span></p><div>' + data.msg + '</div></li>'))
         };
         if (data.counter) {
             $('#online').html('当前在线人数：' + data.counter + "人.");
             if (data.users) {
                 var html = '';
                 for (var i in data.users) {
-                    html += '<li title="' + data.users[i] + '">' + data.users[i] + '</li>';
+                    html += '<li title="' + data.users[i] + '"><pre>' + data.users[i] + '</pre></li>';
                 }
                 $('#userlist').html(html);
             }
@@ -65,4 +72,11 @@ $(function() {
         formatMsg(data);
     });
     socket.on('hi', function() {});
+
+    function formatTime(time) {
+        var d = new Date(parseInt(time));
+        var str = "";
+        str += d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+        return str;
+    }
 });
