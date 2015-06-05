@@ -10,7 +10,7 @@ $(function() {
         };
         $.get('/getmsg', {}, function(result) {
             var html = '';
-            for (var i = 0, l = result.length; i < l; i++) {
+            for (var i = result.length-1; i >=0; i--) {
                 var data = result[i];
                 data.user = data.uname;
                 var cls = '';
@@ -61,7 +61,7 @@ $(function() {
             if (data.users) {
                 var html = '';
                 for (var i in data.users) {
-                    html += '<li title="' + data.users[i] + '"><pre>' + data.users[i] + '</pre></li>';
+                    html += '<li title="' + data.users[i] + '">' + data.users[i] + '</li>';
                 }
                 $('#userlist').html(html);
             }

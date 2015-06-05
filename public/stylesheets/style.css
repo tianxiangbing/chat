@@ -36,3 +36,4 @@ ol li:hover{background-color: #f2f2f2;}
 .menu{position: absolute;top:0;width:100%; height:38px;background-color:#0F67A1;border-bottom-left-radius: 2px;border-bottom-right-radius: 2px;  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);}
 .menu li{list-style:none;float:left;height:38px;line-height:38px;clear:none;}
 .menu li a{font-size:14px;color:white;font-weight:bold;padding:0 10px;}
+#msgContent img{max-height: 150px;max-width: 150px;}

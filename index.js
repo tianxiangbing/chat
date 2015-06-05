@@ -41,6 +41,19 @@ var io = require('socket.io')(server);
 var users = {};
 var counter = 0;
 var xss = require('xss');
+// 添加或更新白名单中的标签 标签名（小写） = ['允许的属性列表（小写）']
+xss.whiteList['img'] = ['src'];
+// 删除默认的白名单标签
+delete xss.whiteList['div'];
+// 自定义处理不在白名单中的标签
+xss.onIgnoreTag = function(tag, html) {
+	// tag：当前标签名（小写），如：a
+	// html：当前标签的HTML代码，如：<a href="ooxx">
+	// 返回新的标签HTML代码，如果想使用默认的处理方式，不返回任何值即可
+	// 比如将标签替换为[removed]：return '[removed]';
+	// 以下为默认的处理代码：
+	return html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 io.on('connection', function(socket) {
 	console.log('a user connected.');
@@ -50,11 +63,11 @@ io.on('connection', function(socket) {
 		console.log('user disconnected.');
 	});
 	socket.on('chat message', function(data) {
-		var msg= data.msg
+		var msg = data.msg
 		var data = {};
-		data.user = xss( username || data.user);
+		data.user = xss(username || data.user);
 		users[username] = data.user;
-		data.msg =  xss(msg);
+		data.msg = xss(msg);
 		data.time = +new Date();
 		sendmsg(data);
 		insertData(data);
@@ -78,8 +91,8 @@ io.on('connection', function(socket) {
 			sendmsg({
 				type: 0,
 				msg: "用户<b>" + username + "</b>离开聊天室",
-				counter:counter,
-				users:users
+				counter: counter,
+				users: users
 			})
 		}
 	});
@@ -89,10 +102,10 @@ function insertData(data) {
 	var conn = db.connect();
 	var post = {
 		msg: data.msg,
-		uname: data.user
-		,time:data.time.toString()
+		uname: data.user,
+		time: data.time.toString()
 	};
-	var query = conn.query('insert into chatmsg set ?', post, function(err,result) {
+	var query = conn.query('insert into chatmsg set ?', post, function(err, result) {
 		console.log(err);
 		console.log(result)
 	})
