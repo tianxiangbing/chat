@@ -15,11 +15,11 @@ $(function() {
                 formatMsg(data);
             }
         }, 'json');
+        $('#inputName').hide();
+        $('#chat').show();
         socket.emit('user join', {
             user: user
         });
-        $('#inputName').hide();
-        $('#chat').show();
     });
     var socket = io();
     $('form').submit(function() {
@@ -59,7 +59,7 @@ $(function() {
                 $('#userlist').html(html);
             }
         }
-        $(window).scrollTop(9999);
+        $('#messages').scrollTop(99999);
     }
     socket.on('chat message', function(data) {
         formatMsg(data);
