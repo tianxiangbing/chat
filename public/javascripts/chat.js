@@ -14,7 +14,7 @@ $(function() {
             $("#u").focus();
             return false;
         };
-        socket = io(":3000");
+        socket = io();
         socket.on('chat message', function(data) {
             formatMsg(data);
         });

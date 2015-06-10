@@ -31,6 +31,7 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
+var socket = require('./socket/msg')(server);
 /**
  * Listen on provided port, on all network interfaces.
  */
