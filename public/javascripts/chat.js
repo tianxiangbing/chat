@@ -18,7 +18,7 @@ $(function() {
         socket.on('chat message', function(data) {
             formatMsg(data);
         });
-        $.get('/getmsg', {}, function(result) {
+        $.get('/getmsg', {name:user}, function(result) {
             var html = '';
             for (var i = result.length-1; i >=0; i--) {
                 var data = result[i];

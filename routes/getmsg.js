@@ -5,7 +5,7 @@ var db = require('../db/mysql');
 
 router.get('/', function(req, res, next) {
 	var conn = db.connect();
-	conn.query('select * from chatmsg order by time desc limit 0,20 ', function(err, result) {
+	var query = conn.query('select * from chatmsg  where uname="'+req.query.name+'" or `to` =""  or `to` is null or `to`="'+req.query.name+'" order by time desc limit 0,20 ', function(err, result) {
 		console.log('err:' + err);
 		console.log(result)
 		if (!err) {
@@ -14,6 +14,7 @@ router.get('/', function(req, res, next) {
 			res.send('[]');
 		}
 	});
+	console.log(query.sql);
 	conn.end();
 });
 

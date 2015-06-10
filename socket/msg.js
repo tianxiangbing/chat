@@ -75,7 +75,8 @@ function insertData(data) {
 	var post = {
 		msg: data.msg,
 		uname: data.user,
-		time: data.time.toString()
+		time: data.time.toString(),
+		to:data.to
 	};
 	var query = conn.query('insert into chatmsg set ?', post, function(err, result) {
 		console.log(err);
