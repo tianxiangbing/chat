@@ -17,7 +17,6 @@ var app = require('./app');
 var debug = require('debug')('web:server');
 var http = require('http');
 
-var db = require('./db/mysql');
 
 /**
  * Get port from environment and store in Express.
@@ -35,91 +34,6 @@ var server = http.createServer(app);
 /**
  * Listen on provided port, on all network interfaces.
  */
-
-var io = require('socket.io')(server);
-
-var users = {};
-var counter = 0;
-var xss = require('xss');
-// 添加或更新白名单中的标签 标签名（小写） = ['允许的属性列表（小写）']
-xss.whiteList['img'] = ['src'];
-// 删除默认的白名单标签
-delete xss.whiteList['div'];
-// 自定义处理不在白名单中的标签
-xss.onIgnoreTag = function(tag, html) {
-	// tag：当前标签名（小写），如：a
-	// html：当前标签的HTML代码，如：<a href="ooxx">
-	// 返回新的标签HTML代码，如果想使用默认的处理方式，不返回任何值即可
-	// 比如将标签替换为[removed]：return '[removed]';
-	// 以下为默认的处理代码：
-	return html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-io.on('connection', function(socket) {
-	console.log('a user connected.');
-	var username = "";
-	socket.broadcast.emit('hi', {})
-	socket.on('disconnect', function() {
-		console.log('user disconnected.');
-	});
-	socket.on('chat message', function(data) {
-		var msg = data.msg
-		var data = {};
-		data.user = xss(username || data.user);
-		users[username] = data.user;
-		data.msg = xss(msg);
-		data.time = +new Date();
-		sendmsg(data);
-		insertData(data);
-	});
-	socket.on('user join', function(data) {
-		counter++;
-		username = xss(data.user);
-		users[username] = xss(username);
-		console.log('join:' + data.user);
-		data.type = 0;
-		data.users = users;
-		data.counter = counter;
-		data.msg = "欢迎<b>" + data.user + "</b>进入聊天室";
-		sendmsg(data);
-	});
-	socket.on('disconnect', function() {
-		console.log('disconnect')
-		if (username) {
-			counter--;
-			delete users[username]
-			sendmsg({
-				type: 0,
-				msg: "用户<b>" + username + "</b>离开聊天室",
-				counter: counter,
-				users: users
-			})
-		}
-	});
-});
-//插入数据库
-function insertData(data) {
-	var conn = db.connect();
-	var post = {
-		msg: data.msg,
-		uname: data.user,
-		time: data.time.toString()
-	};
-	var query = conn.query('insert into chatmsg set ?', post, function(err, result) {
-		console.log(err);
-		console.log(result)
-	})
-	console.log(query.sql);
-	conn.end();
-}
-
-function sendmsg(data) {
-	io.emit('chat message', data);
-}
-
-io.emit('some event', {
-	for: "everyone"
-});
 
 server.listen(port);
 server.on('error', onError);
