@@ -111,6 +111,9 @@ var IO = function(server) {
 		socket.on("home", function(data) {
 			console.log('home:' + home.name)
 			var user = data.user;
+			if( !users[home.name] ){
+				home = {};
+			}
 			if (!home.name) {
 				home.name = user;
 				home.socket = socket;
