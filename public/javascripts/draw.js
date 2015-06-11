@@ -55,9 +55,11 @@ var Draw = {
 			ishome = false;
 		});
 		$('#clear').click(function(){
-			var ctx = drawboard.getContext("2d");
-			ctx.clearRect(0, 0, $(drawboard).width(), $(drawboard).height());
-			send("", "clear");
+			if (ishome) {
+				var ctx = drawboard.getContext("2d");
+				ctx.clearRect(0, 0, $(drawboard).width(), $(drawboard).height());
+				send("", "clear");
+			}
 		});
 		socket.on('home leave', function(username) {
 			$('#showHome').html('当前无人在画画，快来申请作画让其他人猜吧？')
