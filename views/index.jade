@@ -15,9 +15,16 @@ block content
             option(value="") 所有人
           input#m(maxlength=200)
           button#s 发射
+      div.drawboard
+        canvas#drawboard(width="250px",height="200px")
+        input#home(type="button",value="我来画")
+        input#leave(type="button",value="让位")
+        input#clear(type="button",value="清空")
+        p#showHome
     div#users
       div#online
       ol#userlist
   script(src="/javascripts/jquery-1.11.2.js")
   script(src="/javascripts/socket.io.js")
+  script(src="/javascripts/draw.js")
   script(src="/javascripts/chat.js")

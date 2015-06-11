@@ -1,10 +1,10 @@
 ;
 $(function() {
     var user = "";
-    var socket=null;
-    $("#u").keydown(function(e){
-        if(e.keyCode==13){
-          $("#okname").click();
+    var socket = null;
+    $("#u").keydown(function(e) {
+        if (e.keyCode == 13) {
+            $("#okname").click();
         }
     })
     $("#okname").click(function() {
@@ -18,9 +18,12 @@ $(function() {
         socket.on('chat message', function(data) {
             formatMsg(data);
         });
-        $.get('/getmsg', {name:user}, function(result) {
+        Draw.init(socket,user);
+        $.get('/getmsg', {
+            name: user
+        }, function(result) {
             var html = '';
-            for (var i = result.length-1; i >=0; i--) {
+            for (var i = result.length - 1; i >= 0; i--) {
                 var data = result[i];
                 data.user = data.uname;
                 var cls = '';
@@ -38,19 +41,19 @@ $(function() {
             user: user
         });
         //私聊
-       // console.log('to'+user)
-        socket.on('to'+user,function(data){
+        // console.log('to'+user)
+        socket.on('to' + user, function(data) {
             //console.log(data);
             formatMsg(data);
         })
     });
-    $('#users').on('click','li',function(){
-        var v =$(this).html();
-        if($('#sel_obj option[value="'+v+'"]').size()){
-           $('#sel_obj').val(v)
-        }else{
-           $('#sel_obj').append('<option value="'+v+'">'+v+'</option>');
-           $('#sel_obj').val(v);
+    $('#users').on('click', 'li', function() {
+        var v = $(this).html();
+        if ($('#sel_obj option[value="' + v + '"]').size()) {
+            $('#sel_obj').val(v)
+        } else {
+            $('#sel_obj').append('<option value="' + v + '">' + v + '</option>');
+            $('#sel_obj').val(v);
         }
     });
     $('form').submit(function() {
@@ -65,7 +68,7 @@ $(function() {
         socket.emit('chat message', {
             msg: $('#m').val(),
             user: user,
-            to:$('#sel_obj').val()
+            to: $('#sel_obj').val()
         });
         $('#m').val('');
         return false;
@@ -74,17 +77,17 @@ $(function() {
     function formatMsg(data) {
         if (data.type === 0) {
             $('#messages').append($('<li class="notice">系统通知：' + data.msg + '</li>'))
-        }
-        else {
-            var cls = '',type="";
-            if (data.user == $("#u").val()) {
+        } else {
+            var cls = '',
+                type = "";
+            if (data.user == user) {
                 cls += ' mine ';
             }
-            if(data.type === 2){
-                cls +=" private ";
-                type ="（悄悄话）"
+            if (data.type === 2) {
+                cls += " private ";
+                type = "（悄悄话）"
             }
-            $('#messages').append($('<li class="msg ' + cls + '"><p><b>' + data.user +type+ '</b>：<span>(' + formatTime(data.time) + ')</span></p><div>' + data.msg + '</div></li>'))
+            $('#messages').append($('<li class="msg ' + cls + '"><p><b>' + data.user + type + '</b>：<span>(' + formatTime(data.time) + ')</span></p><div>' + data.msg + '</div></li>'))
         };
         if (data.counter) {
             $('#online').html('当前在线人数：' + data.counter + "人.");

@@ -5,7 +5,11 @@ var IO = function(server) {
 	var users = {},
 		usocket = {};
 	var counter = 0;
+	var home = {};
 	var xss = require('xss');
+	var drawlist = ['杯子', '苹果', '香蕉', '花',"乌龟","大象","飞机","手枪","蛋糕","火车","椅子","桌子","大树"];
+	var quest = "";
+	var interval = null;
 	// 添加或更新白名单中的标签 标签名（小写） = ['允许的属性列表（小写）']
 	xss.whiteList['img'] = ['src'];
 	// 删除默认的白名单标签
@@ -18,6 +22,25 @@ var IO = function(server) {
 		// 比如将标签替换为[removed]：return '[removed]';
 		// 以下为默认的处理代码：
 		return html.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	}
+
+	function Quest() {
+		//随机出题
+		outQuest();
+		//interval = setInterval(outQuest, 60000);
+	}
+
+	function outQuest() {
+		quest = drawlist[Math.floor(drawlist.length * Math.random())];
+		console.log("quest:" + quest)
+		home.socket.emit('quest', quest);
+		sendmsg({
+			type: 0,
+			msg: "有个傻逼在画画，快来猜他画的是什么玩意儿。它可能会画( "+ drawlist.join(',')+")"
+		});
+		setTimeout(function() {
+			homeLeave(home.name);
+		}, 30000)
 	}
 
 	io.on('connection', function(socket) {
@@ -43,6 +66,13 @@ var IO = function(server) {
 				sendUserMsg(data);
 			}
 			insertData(data);
+			if(data.msg == quest && username !==home.name){
+				sendmsg({
+					type: 0,
+					msg: "恭喜"+username+"猜出题目。为他贺彩!!同时【"+home.name+"】画得也有模有样！"
+				});
+				homeLeave(home.name);
+			}
 		});
 		socket.on('user join', function(data) {
 			counter++;
@@ -60,7 +90,10 @@ var IO = function(server) {
 			console.log('disconnect')
 			if (username) {
 				counter--;
-				delete users[username]
+				delete users[username];
+				if (home.name == username) {
+					homeLeave(username);
+				}
 				sendmsg({
 					type: 0,
 					msg: "用户<b>" + username + "</b>离开聊天室",
@@ -69,7 +102,42 @@ var IO = function(server) {
 				})
 			}
 		});
+		//绘画
+		socket.on("draw", function(data) {
+			if (data.user == home.name) {
+				io.emit('draw', data);
+			}
+		})
+		socket.on("home", function(data) {
+			console.log('home:' + home.name)
+			var user = data.user;
+			if (!home.name) {
+				home.name = user;
+				home.socket = socket;
+				usocket[user].emit('sys' + user, {
+					user: user,
+					msg: "当前房主(" + home.name + ");等他退出后，你就可以申请房主了."
+				});
+				Quest();
+			} else {
+				usocket[user].emit('sys' + user, {
+					user: home.name,
+					msg: "当前已经有房主(" + home.name + ");等他退出后，你就可以申请房主了."
+				});
+			}
+			console.log('home:' + home.name)
+		});
+		socket.on('home leave', function(uname) {
+			homeLeave(uname);
+		})
 	});
+
+	function homeLeave(uname) {
+		if (home.name && home.name == uname) {
+			home = {};
+			io.emit('home leave', uname);
+		}
+	}
 	//插入数据库
 	function insertData(data) {
 		var conn = db.connect();
