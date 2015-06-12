@@ -1,4 +1,4 @@
-var db = require('..//db/mysql');
+var db = require('../db/mysql');
 var sio = require('socket.io');
 var IO = function(server) {
 	var io = sio.listen(server)
@@ -91,6 +91,7 @@ var IO = function(server) {
 			if (username) {
 				counter--;
 				delete users[username];
+				delete usocket[username];
 				if (home.name == username) {
 					homeLeave(username);
 				}
