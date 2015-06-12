@@ -39,7 +39,7 @@ ol li:hover{background-color: #f2f2f2;}
 .menu li a{font-size:14px;color:white;font-weight:bold;padding:0 10px;}
 #msgContent img{max-height: 150px;max-width: 150px;}
 #sel_obj{width:10%;height: 30px;line-height: 30px;border-right: none;}
-.drawboard{position:absolute;bottom:0;right:10px;width:200px;height:250px;}
+.drawboard{position:absolute;bottom:0;right:63px;width:200px;height:250px;}
 #drawboard{width: 250px;height:200px;background-color: #f2f2f2;border:1px solid #ccc;cursor:url("pen.png"),crosshair;}
 #leave{display: none;margin-left: 10px;}
 #clear{display: none;margin-left: 10px;}
